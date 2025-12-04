@@ -15,13 +15,13 @@ app.use(cors(corsOptions))
 
 initializeDatabase()
 
-app.use('/api/users', require('./routes/userRoutes'))
-app.use('/api/products/', require('./routes/productRoutes'))
-app.use('/api/categories', require('./routes/categoryRoutes'))
-app.use('/api/carts', require('./routes/cartRoutes'))
-app.use('/api/wishlist', require('./routes/wishlistRoutes'))
-app.use('/api/address', require('./routes/addressRoutes'))
-app.use('/api/orders', require('./routes/orderRoutes'))
+app.use('/api/users', require('./api/userRoutes'))
+app.use('/api/products/', require('./api/productRoutes'))
+app.use('/api/categories', require('./api/categoryRoutes'))
+app.use('/api/carts', require('./api/cartRoutes'))
+app.use('/api/wishlist', require('./api/wishlistRoutes'))
+app.use('/api/address', require('./api/addressRoutes'))
+app.use('/api/orders', require('./api/orderRoutes'))
 
 
 app.get('/', (req, res) => res.send("Paintings api are running"))
