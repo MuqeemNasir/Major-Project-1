@@ -16,7 +16,7 @@ app.use(cors(corsOptions))
 initializeDatabase()
 
 app.use('/api/users', require('./routes/userRoutes'))
-app.use('/api/products/', require('./routes/productRoutes'))
+app.use('/api/products', require('./routes/productRoutes'))
 app.use('/api/categories', require('./routes/categoryRoutes'))
 app.use('/api/carts', require('./routes/cartRoutes'))
 app.use('/api/wishlist', require('./routes/wishlistRoutes'))
