@@ -3,6 +3,8 @@ const cors = require('cors')
 const app = express()
 const {initializeDatabase} = require('./db/db.connect')
 
+const defaultUser = require('./middleware/defaultUser')
+
 app.use(express.json())
 
 const corsOptions = {
@@ -14,6 +16,8 @@ const corsOptions = {
 app.use(cors(corsOptions))
 
 initializeDatabase()
+
+app.use(defaultUser)
 
 app.use('/api/users', require('./routes/userRoutes'))
 app.use('/api/products', require('./routes/productRoutes'))
