@@ -3,6 +3,11 @@
 
     const {addAddress, getAddress, getAddressById, updateAddress, deleteAddress} = require('../controllers/addressController')
 
+    router.param("userId", (req, res, next, userId) => {
+    req.userId = userId
+    next()
+})
+
     router.post('/', addAddress)
     router.get('/:userId', getAddress)
     router.get('/single/:addressId', getAddressById)
