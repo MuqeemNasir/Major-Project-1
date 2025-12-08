@@ -2,7 +2,7 @@ const Order = require('../models/order.model')
 const Cart = require('../models/cart.model')
 const Product = require('../models/product.model')
 const Address = require('../models/address.model')
-
+const { DEFAULT_USER_ID } = require('../utils/defaultUser')
 
 const determineOrderItems = async (userId, itemsFromClient) => {
     if (Array.isArray(itemsFromClient) && itemsFromClient.length > 0) {
@@ -63,7 +63,9 @@ const determineShippingAddress = async (shippingAddressId, shippingAddress) => {
 
 const placeOrder = async (req, res) => {
     try {
-        const { userId, shippingAddressId, items: itemsFromClient, shippingAddress } = req.body
+        let { userId, shippingAddressId, items: itemsFromClient, shippingAddress } = req.body
+        userId = userId || DEFAULT_USER_ID
+
         if (!userId) {
             return res.status(400).json({ message: 'UserId is required.' })
         }
@@ -93,7 +95,7 @@ const placeOrder = async (req, res) => {
 
 const getOrders = async (req, res) => {
     try {
-        const { userId } = req.params
+        const userId = req.userId || req.params.userId || DEFAULT_USER_ID
         const orders = await Order.find({ user: userId }).populate('items.product').sort({ createdAt: -1 })
         return res.status(200).json({ data: { orders } })
     } catch (error) {
@@ -104,7 +106,7 @@ const getOrders = async (req, res) => {
  
 const getOrderById = async (req, res) => {
     try {
-        const { orderId } = req.params
+        const orderId = req.params
         const order = await Order.findById(orderId).populate('items.product')
         if (!order) {
             return res.status(404).json({ message: 'Order not found.' })

@@ -9,6 +9,6 @@ router.param("userId", (req, res, next, userId) => {
 })
 
 router.post('/', createUser)
-router.get('/:userId', getUser)
+router.get('/', getUser)
 
 module.exports = router

@@ -1,4 +1,5 @@
 const User = require('../models/user.model')
+const { DEFAULT_USER_ID } = require('../utils/defaultUser')
 
 const createUser = async (req, res) => {
     try {
@@ -20,7 +21,7 @@ const createUser = async (req, res) => {
 
 const getUser = async (req, res) => {
     try {
-        const { userId } = req.params
+        const userId = req.userId || req.params.userId || DEFAULT_USER_ID
         const existingUser = await User.findById(userId).populate('addresses')
         if (!existingUser) {
             return res.status(404).json({ message: 'User not found.' })

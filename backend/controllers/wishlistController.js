@@ -1,9 +1,10 @@
 const Wishlist = require('../models/wishlist.model')
 const Product = require('../models/product.model')
+const { DEFAULT_USER_ID } = require('../utils/defaultUser')
 
 const getWishlist = async (req, res) => {
     try {
-        const { userId } = req.params
+        const userId = req.userId || req.params.userId || DEFAULT_USER_ID
         const wishlist = await Wishlist.findOne({ user: userId }).populate('products')
         if (!wishlist) return res.status(404).json({ message: 'Wishlist not found' })
         res.status(200).json({ data: { wishlist } })
@@ -15,7 +16,9 @@ const getWishlist = async (req, res) => {
 
 const addToWishlist = async (req, res) => {
     try {
-        const { userId, productId } = req.body
+        let { userId, productId } = req.body
+        userId = userId || DEFAULT_USER_ID
+
         if (!userId || !productId) {
             return res.status(400).json({ message: 'userId and productId are required.' })
         }
@@ -50,7 +53,9 @@ const addToWishlist = async (req, res) => {
 
 const removeFromWishlist = async (req, res) => {
     try {
-        const { userId, productId } = req.params
+        const { productId } = req.params
+        let userId = req.userId || req.params.userId || DEFAULT_USER_ID
+
         if(!userId || !productId){
             return res.status(400).json({message: 'userId and productId are required.'})
         }

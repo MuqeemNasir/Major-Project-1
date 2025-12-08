@@ -1,12 +1,13 @@
 const Cart = require('../models/cart.model')
 const Product = require('../models/product.model')
+const { DEFAULT_USER_ID } = require('../utils/defaultUser')
 
 const getCart = async (req, res) => {
     try {
-        const { userId } = req.params
+        const userId = req.userId || req.params.userId || DEFAULT_USER_ID
         const cart = await Cart.findOne({ user: userId }).populate('items.product')
         if (!cart) {
-            return res.status(404).json({ message: 'Cart not found.' });
+            return res.status(200).json({ message: 'Cart not found.' });
         }
         res.status(200).json({ data: { cart } })
     } catch (error) {
@@ -17,7 +18,9 @@ const getCart = async (req, res) => {
 
 const addToCart = async (req, res) => {
     try {
-        const { userId, productId, quantity = 1, size } = req.body
+        let { userId, productId, quantity = 1, size } = req.body
+        userId = userId || DEFAULT_USER_ID
+
         if (!userId || !productId) {
             return res.status(400).json({ message: 'userId and productId are required.' })
         }
@@ -58,7 +61,9 @@ const addToCart = async (req, res) => {
 
 const updateQuantity = async (req, res) => {
     try {
-        const { userId, productId, quantity, size } = req.body
+        let { userId, productId, quantity, size } = req.body
+        userId = userId || DEFAULT_USER_ID
+
         if (!userId || !productId || typeof quantity === "undefined") {
             return res.status(400).json({ message: 'userId, productId and quantity are required.' });
         }
@@ -89,7 +94,9 @@ const updateQuantity = async (req, res) => {
 
 const removeFromCart = async (req, res) => {
     try {
-        const { userId, productId } = req.params
+        const userId = req.userId || req.params.userId || DEFAULT_USER_ID
+        
+        const { productId } = req.params
         const size = req.query?.size ?? req.params?.size ?? ""
 
         if (!userId || !productId) {
@@ -109,7 +116,7 @@ const removeFromCart = async (req, res) => {
 
 const clearCart = async (req, res) => {
     try {
-        const { userId } = req.params
+        const userId = req.userId || req.params.userId || DEFAULT_USER_ID
         await Cart.findOneAndDelete({ user: userId })
         res.status(200).json({ message: 'Cart cleared.' })
     } catch (error) {

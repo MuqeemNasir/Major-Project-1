@@ -1,9 +1,12 @@
 const Address = require('../models/address.model')
 const User = require('../models/user.model')
+const { DEFAULT_USER_ID } = require("../utils/defaultUser")
 
 const addAddress = async (req, res) => {
     try {
-        const { userId, ...addressData } = req.body
+        const { ...addressData } = req.body
+        let {userId} = req.body
+        userId = req.userId || userId || DEFAULT_USER_ID 
         if (!userId) {
             return res.status(400).json({ message: 'User ID is required.' })
         }
@@ -21,7 +24,7 @@ const addAddress = async (req, res) => {
 
 const getAddress = async (req, res) => {
     try {
-        const { userId } = req.params
+        const userId = req.userId || req.params.userId || DEFAULT_USER_ID
         const user = await User.findById(userId).populate('addresses')
         if (!user) {
             return res.status(404).json({ message: 'User not found' })
@@ -65,7 +68,8 @@ const updateAddress = async (req, res) => {
 
 const deleteAddress = async (req, res) => {
     try {
-        const { userId, addressId } = req.params
+        const { addressId } = req.params
+        let userId = req.userId || req.params.userId || DEFAULT_USER_ID
         await Address.findByIdAndDelete(addressId)
         await User.findByIdAndUpdate(userId, { $pull: { addresses: addressId } })
         res.status(200).json({ message: "Address deleted successfully" })
