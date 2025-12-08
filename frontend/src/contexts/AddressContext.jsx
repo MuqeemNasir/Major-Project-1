@@ -31,7 +31,7 @@ export const AddressProvider = ({children}) => {
     const addAddress = async(data) => {
         setLoading(true)
         try{
-            await apiAddAddress({userId: USER_ID, ...data})
+            await apiAddAddress({...data})
             await loadAddresses()
         }catch(error){
             console.error("Failed to add address", error)
@@ -57,7 +57,7 @@ export const AddressProvider = ({children}) => {
     const deleteAddress = async(addressId) => {
         setLoading(true)
         try{
-            await apiDeleteAddress(USER_ID, addressId)
+            await apiDeleteAddress(null, addressId)
             await loadAddresses()
         }catch(error){
             console.error("Failed to delete address", error)

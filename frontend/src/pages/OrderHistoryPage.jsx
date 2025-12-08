@@ -33,7 +33,7 @@ const OrderHistoryPage = () => {
         
         const fetchOrders = async() => {
             try{
-                const res = await apiGetOrders(userId)
+                const res = await apiGetOrders()
                 setOrders(res?.data?.orders || [])
             }catch(err){
                 console.error("Error fetching orders: ", err)

@@ -5,19 +5,22 @@ const CartContext = createContext()
 export const useCartContext = () => useContext(CartContext)
 
 export const CartProvider = ({children}) => {
-    const USER_ID = import.meta.env.VITE_USER_ID || "demoUserId"
     const [cart, setCart] = useState([])
     const [loading, setLoading] = useState(false)
 
     const loadCart = async() => {
         setLoading(true)
         try{
-            const res = await apiGetCart(USER_ID)
+            const res = await apiGetCart()
             // setCart(res?.data?.data?.cart.items || [])
             const items = res?.data?.data?.cart?.items ?? []
             setCart(items)
             return res
         }catch(error){
+            if(error.response && error.response.status === 404){
+                setCart([])
+                return
+            }
             console.error("Failed to load cart", error)
             setCart([])
             throw error
@@ -30,7 +33,7 @@ export const CartProvider = ({children}) => {
         setLoading(true)
         try{
             if (!productId) throw new Error("productId required");
-            await apiAddToCart({userId: USER_ID, productId, quantity, size})
+            await apiAddToCart({ productId, quantity, size})
             await loadCart()
         }catch(error){
             console.error("Failed to add to cart", error)
@@ -46,7 +49,7 @@ export const CartProvider = ({children}) => {
             if(!productId || typeof quantity === "undefined"){
                 throw new Error("productId and quantity required")
             }
-            await apiUpdateCart({userId: USER_ID, productId, quantity, size})
+            await apiUpdateCart({productId, quantity, size})
             await loadCart()
         }catch(error){
             console.error("Failed to update cart", error)
@@ -59,7 +62,7 @@ export const CartProvider = ({children}) => {
     const removeItemFromCart = async(productId, size = "") => {
         setLoading(true)
         try{
-            await apiRemoveFromCart(USER_ID, productId, size)
+            await apiRemoveFromCart(null, productId, size)
             await loadCart()
         }catch(error){
             console.error("Failed to remove item from cart", error)
@@ -72,7 +75,7 @@ export const CartProvider = ({children}) => {
     const clearCart = async() => {
         setLoading(true)
         try{
-            await apiClearCart(USER_ID)
+            await apiClearCart(null)
             await loadCart()
         }catch(error){
             console.error("Failed to clear the cart", error)

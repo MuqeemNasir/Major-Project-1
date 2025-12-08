@@ -6,7 +6,7 @@ export const apiPlaceOrder = async (payload) => {
 }
 
 export const apiGetOrders = async (userId) => {
-    const res = await API.get(`/orders/user/${userId}`)
+    const res = await API.get(`/orders`)
     return res.data
 }
 

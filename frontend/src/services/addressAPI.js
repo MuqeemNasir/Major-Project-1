@@ -1,6 +1,6 @@
 import API from './api'
 export const apiGetAddress = async (userId) => {
-    const res = await API.get(`/address/${userId}`)
+    const res = await API.get(`/address`)
     return res.data.data.addresses
 }
 
@@ -20,6 +20,6 @@ export const apiUpdateAddress = async (addressId, payload) => {
 }
 
 export const apiDeleteAddress = async (userId, addressId) => {
-    const res = await API.delete(`/address/${userId}/${addressId}`)
-    return res.data.data.address
+    const res = await API.delete(`/address/${addressId}`)
+    return res.data
 }

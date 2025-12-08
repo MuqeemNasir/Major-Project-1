@@ -5,14 +5,13 @@ const WishlistContext = createContext()
 export const useWishlistContext = () => useContext(WishlistContext)
 
 export const WishlistProvider = ({children}) => {
-    const USER_ID = import.meta.env.VITE_USER_ID || "demoUserId"
     const [wishlist, setWishlist] = useState([])
     const [loading, setLoading] = useState(false)
 
     const loadWishlist = async() => {
         setLoading(true)
         try{
-            const res = await apiGetWishlist(USER_ID)
+            const res = await apiGetWishlist()
             const wl = res?.data?.data?.wishlist
             // setWishlist(wl?.products ? wl.products : (wl || []))
             const products = wl?.products ? wl.products : (wl || [])
@@ -28,7 +27,7 @@ export const WishlistProvider = ({children}) => {
     const addToWishlist = async ({productId}) => {
         setLoading(true)
         try{
-            const res = await apiAddToWishlist({userId: USER_ID,  productId})
+            const res = await apiAddToWishlist({productId})
             await loadWishlist()
             return res
         }catch(error){
@@ -42,7 +41,7 @@ export const WishlistProvider = ({children}) => {
     const removeFromWishlist = async({productId}) => {
         setLoading(true)
         try{
-            const res = await apiRemoveFromWishlist(USER_ID, productId)
+            const res = await apiRemoveFromWishlist(null, productId)
             await loadWishlist()
             return res
         }catch(error){

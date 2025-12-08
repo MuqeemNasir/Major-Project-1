@@ -8,8 +8,5 @@ export const apiRegisterUser = async(payload) => {
 }
 
 export const apiGetUser = (userId = USER_ID) => {
-  if(!userId){
-    throw new Error("User ID not available for apiGetUser()")
-  }
-  return API.get(`/users/${userId}`);
+    return API.get(`/users`);
 }
