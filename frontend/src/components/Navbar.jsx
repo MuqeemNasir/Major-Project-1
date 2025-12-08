@@ -1,5 +1,5 @@
 import {Link, useNavigate, useLocation} from 'react-router-dom'
-import {FaHeart, FaShoppingCart} from "react-icons/fa"
+import {FaHeart, FaShoppingCart, FaUser} from "react-icons/fa"
 import { useState, useEffect } from 'react'
 import { useWishlistContext } from "../contexts/WishlistContext"
 import { useCartContext } from '../contexts/CartContext'
@@ -42,7 +42,8 @@ export default function Navbar(){
                         <input type="text" className="form-control rounded-pill px-3" placeholder="search" value={query} onChange={onSearch} aria-label="Search" />
                     </form>
                     <div className="d-flex align-items-center gap-5">
-                        <button className='btn btn-outline-dark btn-sm' data-bs-toggle="offcanvas" data-bs-target="#userDrawer">Login</button>
+                        <button className='btn btn-outline-dark btn-sm' >Login</button>
+                        <button className='btn btn-outline-dark btn-sm' data-bs-toggle="offcanvas" data-bs-target="#userDrawer"><FaUser /><span className='d-none d-sm-inline'>Profile</span></button>
                         {/* <Link to="/login" className="btn btn-outline-dark btn-sm">Login</Link> */}
                         <Link to="/wishlist" className="position-relative text-dark nav-link">
                             <FaHeart />
