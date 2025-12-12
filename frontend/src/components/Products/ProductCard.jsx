@@ -1,67 +1,95 @@
 import { useEffect, useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
+import { toast } from "react-toastify"
 
-
-export default function ProductCard({product, onAddToCart, onAddToWishlist,onRemoveFromCart, onRemoveFromWishlist, isInCart = false, isInWishlist = false}) {
-    const [cartAdded, setCartAdded] = useState(Boolean(isInCart))
+export default function ProductCard({product, onAddToCart, onAddToWishlist, onRemoveFromWishlist, isInCart = false, isInWishlist = false}) {
     const [wishAdded, setWishAdded] = useState(Boolean(isInWishlist))
+    const [cartAdded, setCartAdded] = useState(Boolean(isInCart))
     const navigate = useNavigate()
-
-    const goToProduct = () => navigate(`/product/${product._id}`)
-
-    useEffect(() => {
-        setCartAdded(Boolean(isInCart))
-    }, [isInCart])
 
     useEffect(() => {
         setWishAdded(Boolean(isInWishlist))
     }, [isInWishlist])
 
-    const toggleWishlist = () => {
+    useEffect(() => {
+        setCartAdded(Boolean(isInCart))
+    }, [isInCart])
+
+    const toggleWishlist = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         if(wishAdded){
-            onRemoveFromWishlist?.()
-            setWishAdded(false)
+            if(onRemoveFromWishlist){
+                onRemoveFromWishlist?.()
+                toast.info("Removed from Wishlist")
+                setWishAdded(false)
+            }  
         }else{
-            onAddToWishlist?.()
-            setWishAdded(true)
+            if(onAddToWishlist){
+                onAddToWishlist?.()
+                toast.success("Added to Wishlist")
+                setWishAdded(true)
+            }   
+        }
+    }
+
+    const handleCardClick = () => {
+        navigate(`/product/${product._id}`)
+    }
+
+    const handleAddToCart = (e) => {
+        e.preventDefault(); 
+        e.stopPropagation();
+        
+        if(cartAdded){
+            navigate("/cart")
+        } else {
+            const defaultSize = product.sizes && product.sizes.length > 0 ? product.sizes[0] : ""
+            if(onAddToCart){
+                onAddToCart(product._id, 1, defaultSize)
+                toast.success("Added to Cart")
+                setCartAdded(true)
+            }
         }
     }
     
     return(
-        <div className="card shadow-sm h-100 w-100" >
-            {/* <div className="position-absolute top-0 end-0 m-1 p-1 bg-transparent rounded-circle shadow-sm" style={{ zIndex: 5}} >
-                <div style={{cursor: "pointer"}} onClick={toggleWishlist}>
-                    <FaHeart color={wishAdded ? "red" : "grey"} size={18}/>
-                </div>
-            </div> */}
-            <button onClick={toggleWishlist} className="position-absolute top-0 end-0  btn-light fs-4 border-0 rounded-circle bg-transparent shadow-sm">{wishAdded ? "❤️" : "🤍"}</button>
-            <Link to={`/product/${product._id}`}>
-                <img src={ product.image || product.imageUrls?.[0] || ""} alt={product.name} className="card-img-top" style={{height: "200px", objectFit: "cover"}} />
-            </Link>
-            <div className="card-body d-flex flex-column text-center">
-                <h5 className="card-title text-truncate">{product.name}</h5>
-                <p className="card-text fw-bold mb-1">₹{product.price}</p>
+        <div className="card shadow-sm h-100 w-100 border-0" onClick={handleCardClick} style={{cursor: "pointer", transition: "transform 0.2s"}}>
+            <div className="position-relative bg-light rounded-top">
+                 <img src={ product.image || product.imageUrls?.[0] || ""} alt={product.name} className="card-img-top" style={{height: "230px", objectFit: "cover", width: "100%"}} />
+                 
+                 <button onClick={toggleWishlist} className="position-absolute top-0 end-0 m-2 btn btn-light rounded-circle shadow-sm p-2 d-flex align-items-center justify-content-center border-0" style={{width:"35px", height:"35px", zIndex: 10}} title={wishAdded ? "Remove from Wishlist" : "Add to Wishlist"}>
+                    <span style={{fontSize: "1.2rem", lineHeight: 5}}>{wishAdded ? "❤️" : "🤍"}</span>
+                 </button>
+            </div>
 
-                <div className="mb-2">
+            <div className="card-body d-flex flex-column">
+                <h5 className="card-title text-truncate fw-semibold mb-1" style={{fontSize: "1rem"}}>{product.name}</h5>
+                <p className="card-text fw-bold mb-2">₹{product.price}</p>
+
+                <div className="mb-3 small">
                     {Array.from({ length: 5}).map((_, idx) => (
-                        <span key={idx} style={{ color: idx < Math.round(product.rating || 0) ? "#ffc107" : "#ddd"}}>★</span>
+                        <span key={idx} style={{ color: idx < Math.round(product.rating || 0) ? "#ffc107" : "#e4e5e9"}}>★</span>
                     ))}
                 </div>
                               
-                <div className="d-grid gap-2 mt-auto">
+            </div>
+                <div className="mt-auto d-grid gap-2">
                     {cartAdded ? (
-                        <Link to="/cart" className="btn btn-primary btn-sm">Go to Cart</Link>
+                        <button className="btn btn-outline-primary btn-sm fw-semibold" onClick={handleAddToCart}>
+                            Go to Cart
+                        </button>
                     ) : (
-                        <button className="btn btn-secondary btn-sm" onClick={goToProduct}>Add to Cart</button>
+                        <button className="btn btn-secondary btn-sm fw-semibold" onClick={handleAddToCart}>
+                            Add to Cart
+                        </button>
                     )}
-
                     {wishAdded ? (
                         <button className="btn btn-outline-secondary btn-sm" onClick={toggleWishlist}>Remove from Wishlist</button>
                     ) : (
                         <button className="btn btn-light btn-sm" onClick={toggleWishlist}>Save to Wishlist</button>
                     )}
                 </div>
-            </div>
         </div>
     )
 }

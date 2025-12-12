@@ -1,36 +1,34 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { apiGetProductsById } from "../services/productAPI";
-import { useCartContext } from "../contexts/CartContext";
-import { useWishlistContext } from "../contexts/WishlistContext";
-import { FiCreditCard, FiLock, FiRefreshCcw, FiTruck } from "react-icons/fi";
-import RelatedProducts from "../components/Products/RelatedProducts";
+import { useEffect, useState } from "react"
+import { useNavigate, useParams } from "react-router-dom"
+import { apiGetProductsById } from "../services/productAPI"
+import { useCartContext } from "../contexts/CartContext"
+import { useWishlistContext } from "../contexts/WishlistContext"
+import { FiCreditCard, FiLock, FiRefreshCcw, FiTruck } from "react-icons/fi"
+import RelatedProducts from "../components/Products/RelatedProducts"
+import { toast } from "react-toastify";
 
 const ProductDetail = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const { id } = useParams()
+  const navigate = useNavigate()
 
-  const { addToCart } = useCartContext();
-  const { addToWishlist, removeFromWishlist, wishlist } = useWishlistContext();
+  const { addToCart, cart } = useCartContext() 
+  const { addToWishlist, removeFromWishlist, wishlist } = useWishlistContext()
 
-  const [product, setProduct] = useState(null);
-  const [quantity, setQuantity] = useState(1);
-  const [size, setSize] = useState(null);
+  const [product, setProduct] = useState(null)
+  const [quantity, setQuantity] = useState(1)
+  const [size, setSize] = useState(null)
 
-  const isWishlisted = wishlist?.some(
-    (w) => String(w.productId || w._id) === String(id)
-  );
+  const isWishlisted = wishlist?.some(w => String(w.productId || w._id) === String(id))
+  const isInCart = cart?.some(item => String(item.product._id || item.product) === String(id) && (item.size || "") === (size || ""))
 
   useEffect(() => {
-    fetchProduct();
-  }, [id]);
+    fetchProduct()
+  }, [id])
 
   const fetchProduct = async () => {
     try {
-      const res = await apiGetProductsById(id);
-      const prod =
-        res?.data?.data?.product || res?.data?.product || res?.product || res;
-
+      const res = await apiGetProductsById(id)
+      const prod = res?.data?.data?.product || res?.data?.product || res?.product || res
       setProduct({
         ...prod,
         image: prod.image || prod.imageUrls?.[0] || "",
@@ -39,218 +37,170 @@ const ProductDetail = () => {
         sizes: prod.sizes || [],
       });
 
-      if (prod?.sizes?.length === 1) {
-        setSize(prod.sizes[0]);
-      } else {
-        setSize("");
-      }
+      if (prod?.sizes?.length === 1) setSize(prod.sizes[0])
+      else setSize("")
     } catch (error) {
-      console.log("Single product fetch error: ", error);
+      console.log("Single product fetch error: ", error)
     }
   };
 
   const handleAddToCart = async () => {
     if (product.sizes?.length > 0 && !size) {
-      alert("Please select a size before adding to cart");
-      return;
+      toast.error("Please select a size!")
+      return
+    }
+
+    if (isInCart) {
+      navigate("/cart")
+      return
     }
 
     try {
       await addToCart(product._id, quantity, size || "");
-      alert("Added to cart");
+      toast.success("Added to cart!")
     } catch (err) {
-      console.error("Add to cart failed: ", err);
-      alert("Failed to add to cart");
+       console.error("Add to cart failed: ", err)
+      toast.error("Failed to add to cart")
     }
-  };
+  }
 
   const handleBuyNow = async() => {
-    if(product.sizes?.length > 0 && !size){
-        alert("Please select a size.")
+    if (product.sizes?.length > 0 && !size) {
+        toast.error("Please select a size!")
         return
     }
-
-    try {
-      await addToCart(product._id, quantity, size || "");
+    try{
+      await addToCart(product._id, quantity, size || "")
       navigate("/cart")
-    } catch (err) {
-      console.error("Buy Now failed: ", err);
-      alert("Failed to Buy Now.");
+    }catch(error){
+      console.error("Buy Now failed: ", err)
+      toast.error("Failed to Buy Now.")
     }
   }
 
   const handleWishlist = async () => {
     try {
       if (isWishlisted) {
-        await removeFromWishlist({ productId: id });
+        await removeFromWishlist({ productId: id })
+        toast.info("Removed from Wishlist")
       } else {
-        await addToWishlist({ productId: id });
+        await addToWishlist({ productId: id })
+        toast.success("Added to Wishlist")
       }
     } catch (err) {
-      console.error("Wishlist error: ", err);
+      console.error("Wishlist error: ", err)
+      toast.error("Wishlist action failed")
     }
-  };
-
-  if (!product) {
-    return (
-      <div className="text-center py-5 fw-semibold">Loading product...</div>
-    );
   }
 
+  if (!product) return <div className="text-center py-5 fw-semibold">Loading product...</div>
+
   return (
-    <div className="container py-5">
-      <div className="row">
-        <div className="col-md-4 text-center mb-5">
-          <div className="position-relative">
+    <div className="container-fluid container-md py-3 py-md-2">
+      <div className="row g-3 g-md-5">
+        <div className="col-12 col-md-6">
+          <div className="position-relative bg-light rounded shadow-sm d-flex align-items-center justify-content-center">
             <img
-              src={product.image || product.imageUrls?.[0]}
+              src={product.image}
               alt={product.name}
-              className="img-fluid rounded shadow"
-              style={{ objectFit: "cover", height: "100%", width: "100%" }}
+              className="img-fluid rounded shadow-sm w-100"
+              style={{ objectFit: "cover", width: "100%", maxHeight: window.innerWidth < 768 ? "350px" : "500px", backgroundColor: "#f8f9fa" }}
             />
-            {/* <div className="position-absolute top-0 end-0 m-1 p-1 bg-transparent rounded-circle shadow-sm" style={{ zIndex: 5}} >
-                                        <div style={{cursor: "pointer"}} onClick={handleWishlist}>
-                                            <FaHeart color={isWishlisted ? "red" : "grey"} size={18}/>
-                                        </div>
-                                    </div> */}
             <button
               onClick={handleWishlist}
-              className="position-absolute top-0 end-0  btn-light fs-4 border-0 rounded-circle bg-transparent shadow-sm"
+              className="position-absolute top-0 end-0 m-3 btn btn-light rounded-circle shadow p-2 d-flex align-items-center justify-content-center"
+              style={{width: "45px", height: "45px", border: "1px solid #eee"}}
+              title={isWishlisted ? "Removed from Wishlist" : "Add to Wishlist"}
             >
-              {isWishlisted ? "❤️" : "🤍"}
+              <span className="fs-5">{isWishlisted ? "❤️" : "🤍"}</span>
             </button>
           </div>
-          <div className="mt-4 d-grid gap-2">
-            <button onClick={handleBuyNow} className="btn btn-primary btn-lg">Buy Now</button>
-            <button
-              className="btn btn-secondary btn-lg"
-              onClick={handleAddToCart}
-            >
-              Add to Cart
+          <div className="mt-4 d-none d-md-flex gap-3">
+            <button onClick={handleBuyNow} className="btn btn-primary flex-grow-1 py-3 fw-bold shadow-sm">Buy Now</button>
+            <button className={`btn ${isInCart ? 'btn-success' : 'btn-dark'} flex-grow-1 py-3 fw-bold shadow-sm`} onClick={handleAddToCart}>
+              {isInCart ? "Go to Cart" : "Add to Cart"}
             </button>
           </div>
         </div>
-        <div className="col-md-8">
-          <h3>{product.name}</h3>
-          <p>
-            {product.rating}{" "}
-            <span className="mb-2">
-              {Array.from({ length: 5 }).map((_, idx) => (
-                <span
-                  key={idx}
-                  style={{
-                    color:
-                      idx < Math.round(product.rating || 0)
-                        ? "#ffc107"
-                        : "#ddd",
-                  }}
-                >
-                  ★
-                </span>
-              ))}
-            </span>
-          </p>
-          <h3 className="fw-bold">₹{product.price}</h3>
-          <div className="mt-4">
-            <p className="fw-semibold mb-1">Quantity:</p>
-            <div className="d-flex align-items-center gap-3">
-              <button
-                className="btn btn-sm btn-outline-secondary"
-                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              >
-                -
-              </button>
-              <h5 className="mb-0">{quantity}</h5>
-              <button
-                className="btn btn-sm btn-outline-secondary"
-                onClick={() => setQuantity((q) => Math.max(1, q + 1))}
-              >
-                +
-              </button>
-            </div>
+
+        <div className="col-12 col-md-6 pb-5 pb-md-0">
+          <h2 className="fw-bold mb-1 fs-3 fs-md-2">{product.name}</h2>
+          <p className="text-muted small mb-2">{product.category?.name || "Art"}</p>
+          
+          <div className="d-flex align-items-center mb-3">
+            <span className="badge bg-warning text-dark me-2 px-2 py-1">{product.rating} ★</span>
+            <span className="text-muted small">{product.numReviews || 0} Reviews</span>
           </div>
-          <div className="mt-4">
-            <p className="fw-semibold mb-1">Sizes:</p>
+
+          <div className="mb-4 ">
+             <h3 className="fw-bold text-dark">₹{product.price / 2} <span className="text-muted fs-6 text-decoration-line-through fw-normal ms-2">₹{product.price}</span> <span className="text-success fs-6 ms-2">(50% OFF)</span></h3>
+             <p className="text-success small fw-bold">inclusive of all taxes</p>
+          </div>
+
+        {product.sizes?.length > 0 && (
+          <div className="mb-4">
+            <p className="fw-semibold mb-2">Select Size:</p>
             <div className="d-flex gap-2">
-              {product.sizes?.length > 0 ? (
-                product.sizes.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setSize(s)}
-                    className={`btn ${
-                      size === s ? "btn-primary" : "btn-outline-dark"
-                    }`}
-                  >
+                {product.sizes.map((s) => (
+                  <button key={s} onClick={() => setSize(s)}
+                    className={`btn px-3 ${size === s ? "btn-dark" : "btn-outline-secondary"}`}>
                     {s}
                   </button>
-                ))
-              ) : (
-                <p className="text-muted">No sizes available</p>
-              )}
+                ))}
             </div>
+          </div>
+        )}
+
+          <div className="mb-4">
+            <p className="fw-semibold mb-2">Quantity: </p>
+             <div className="input-group" style={{width: "110px"}}>
+                <button className="btn btn-outline-secondary" onClick={() => setQuantity(q => Math.max(1, q - 1))}>-</button>
+                <input type="text" className="form-control text-center" value={quantity} readOnly />
+                <button className="btn btn-outline-secondary" onClick={() => setQuantity(q => q + 1)}>+</button>
+             </div>
+          </div>
+          <hr/>
+          <div className="row g-2 mt-2">
+            <div className="col-3 text-center"><FiTruck className="mb-1" size={20}/><br/><small style={{fontSize: '0.7rem'}}>Free Delivery</small></div>
+            <div className="col-3 text-center"><FiRefreshCcw className="mb-1" size={20}/><br/><small style={{fontSize: '0.7rem'}}>Returns</small></div>
+            <div className="col-3 text-center"><FiLock className="mb-1" size={20}/><br/><small style={{fontSize: '0.7rem'}}>Secure</small></div>
+            <div className="col-3 text-center"><FiCreditCard className="mb-1" size={20}/><br/><small style={{fontSize: '0.7rem'}}>Pay on Delivery</small></div>
           </div>
           <hr />
 
-          <div className="mt-2 p-3 border-rounded d-flex flex-wrap gap-4 bg-light">
-            <div className="d-flex align-items-center gap-2">
-              <FiRefreshCcw className="text-dark" size={18} />
-              <span className="text-muted">10-Day Returnable</span>
-            </div>
-
-            <div className="d-flex align-items-center gap-2">
-              <FiCreditCard className="text-dark" size={18} />
-              <span className="text-muted">Pay on Delivery</span>
-            </div>
-
-            <div className="d-flex align-items-center gap-2">
-              <FiTruck className="text-dark" size={18} />
-              <span className="text-muted">Free Delivery</span>
-            </div>
-
-            <div className="d-flex align-items-center gap-2">
-              <FiLock className="text-dark" size={18} />
-              <span className="text-muted">Secure Payment</span>
+          {/* //for mobile screen */}
+          <div className="mt-4 small">
+            <h5 className="fw-bold pb-2">Product Details:</h5>
+            <div className="row mt-3 g-2 ">
+              <div className="col-6"><small className="text-muted">Artist</small><p className="fw-semibold">
+                {product.artist || "N/A"}</p>
+              </div>
+              <div className="col-6"><small className="text-muted">Medium</small><p className="fw-semibold">
+                {product.medium || "Canvas / Digital"}</p>
+              </div>
+              <div className="col-6"><small className="text-muted">Weight</small><p className="fw-semibold">
+                {product.weight || "Lightweight"}</p>
+              </div>
+              <div className="col-6"><small className="text-muted">Availability</small><p className="fw-semibold">
+                {product.availability || "In Stock"}</p>
+              </div>
+              <div className="col-6"><small className="text-muted">Year</small><p className="fw-semibold">
+                {product.year || "2022"}</p>
+              </div>
+              <div>
+              <p className="text-muted mt-2 small">{product.description}</p>
+              </div>
             </div>
           </div>
 
-          <hr />
-          <div className="mt-4">
-            <h5>Description:</h5>
-            <ul className="list-unstyled mt-3 text-muted">
-              <li>
-                <strong>Artist: </strong>
-                {product.artist || "N/A"}
-              </li>
-              <li>
-                <strong>Reviews: </strong>
-                {product.numReviews || "N/A"}
-              </li>
-              <li>
-                <strong>Medium: </strong>
-                {product.medium || "Canvas / Digital"}
-              </li>
-              <li>
-                <strong>Weight: </strong>
-                {product.weight || "Lightweight"}
-              </li>
-              <li>
-                <strong>Availability: </strong>
-                {product.availability || "In Stock"}
-              </li>
-              <li>
-                <strong>Launch Year: </strong>
-                {product.year || "2022"}
-              </li>
-              <li className="text-muted mt-2">{product.description}</li>
-            </ul>
+          <div className="d-md-none fixed-bottom bg-white shadow-lg p-3 border-top d-flex gap-2" style={{zIndex: 1000}}>
+            <button className="btn btn-primary flex-grow-1 fw-bold" onClick={handleBuyNow}>Buy Now</button>
+            <button className={`btn ${isInCart ? 'btn-success' : 'btn-dark'} flex-grow-1 fw-bold`} onClick={handleAddToCart}>{isInCart ? "Go to Cart" : "Add to Cart"}</button>
           </div>
         </div>
       </div>
-
-      <div>
-        <hr />
-        <RelatedProducts currentProductId={product._id} />
-      </div>
+      <hr />
+      <RelatedProducts currentProductId={product._id} />
     </div>
   );
 };

@@ -5,6 +5,7 @@ import Filters from "../components/Filters/Filters";
 import ProductCard from "../components/Products/ProductCard";
 import { useCartContext } from "../contexts/CartContext";
 import { useWishlistContext } from "../contexts/WishlistContext";
+import { FaFilter } from "react-icons/fa";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -124,7 +125,7 @@ const ProductList = () => {
     setProducts(filtered);
   };
 
-  const safeAddToCart = (id) => addToCart && addToCart(id, 1);
+  const safeAddToCart = (id, qty, size) => addToCart && addToCart(id, qty, size);
   const safeRemoveFromCart = (id) =>
     removeItemFromCart && removeItemFromCart(id);
   const safeAddToWishlist = (id) =>
@@ -143,9 +144,12 @@ const ProductList = () => {
   };
 
   return (
-    <div className="mt-4">
+    <div className="mt-4 mb-5">
+      <div className="d-md-none mb-3">
+        <button className="btn btn-outline-dark w-100 d-flex align-items-center justify-content-center gap-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileFilters"><FaFilter />Filters & Sort</button>
+      </div>
       <div className="row">
-        <div className="col-md-3">
+        <div className="col-md-3 d-none d-md-block">
           <Filters
             categories={categories}
             filters={filters}
@@ -154,21 +158,38 @@ const ProductList = () => {
           />
         </div>
 
+        <div className="offcanvas offcanvas-start" tabIndex="-1" id="mobileFilters" aria-labelledby="mobileFiltersLabel">
+          <div className="offcanvas-header border-bottom">
+            <h5 className="offcanvas-title fw-bold" id="mobileFiltersLabel">Filters</h5>
+            <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          </div>
+          <div className="offcanvas-body">
+            <Filters 
+              categories={categories}
+              filters={filters}
+              setFilters={setFilters}
+              clearFilters={clearFilters}
+            />
+          </div>
+        </div>
+
         <div className="col-md-9">
-          <h6 className="fw-semibold mb-3">
+          <div className="d-flex justify-content-between align-items-center mb-1">
+          <h6 className="fw-semibold">
             Showing All Products{" "}
             <span className="text-muted small">
               ( {products.length} products)
             </span>
           </h6>
+          </div>
 
           <div className="row g-4">
             {products.length > 0 ? (
               products.map((item) => (
-                <div key={item._id} className="col-md-4 d-flex">
+                <div key={item._id} className="col-md-4 col-6 d-flex">
                   <ProductCard
                     product={item}
-                    onAddToCart={() => safeAddToCart(item._id)}
+                    onAddToCart={(id, qty, size) => safeAddToCart(id, qty, size)}
                     onRemoveFromCart={() => safeRemoveFromCart(item._id)}
                     onAddToWishlist={() => safeAddToWishlist(item._id)}
                     onRemoveFromWishlist={() =>
@@ -187,10 +208,11 @@ const ProductList = () => {
                 </div>
               ))
             ) : (
-              <div className="col-12">
-                <p className="text-muted">
+              <div className="col-12 text-center py-5">
+                <p className="text-muted fs-4">
                   No products match the selected filters.
                 </p>
+                <button className="btn btn-link" onClick={clearFilters}>Clear all Filters</button>
               </div>
             )}
           </div>

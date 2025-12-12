@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { apiGetAllProducts, apiGetCategories } from "../services/productAPI";
 import { useNavigate } from "react-router-dom";
+import { FaArrowRight } from "react-icons/fa";
 
 export default function Home() {
   const [categories, setCategories] = useState([]);
-  const [randomCategories, setRandomCategories] = useState([]);
   const [products, setProducts] = useState([]);
-  const [randomProducts, setRandomProducts] = useState([]);
+  const [randomCollections, setRandomCollections] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -14,20 +14,21 @@ export default function Home() {
     const load = async () => {
       setLoading(true);
       try {
-        const catRes = await apiGetCategories();
-        setCategories(catRes);
+        const [catRes, prodRes] = await Promise.all([
+          apiGetCategories(),
+          apiGetAllProducts()
+        ])
 
-        const shuffledCats = [...catRes].sort(() => 0.5 - Math.random());
-        setRandomCategories(shuffledCats.slice(0, 4));
+        setProducts(prodRes || []);
 
-        const prodRes = await apiGetAllProducts();
-        setProducts(prodRes);
+        const shuffledCats = (catRes || []).sort(() => 0.5 - Math.random());
+        setCategories(shuffledCats.slice(0, 4));
 
-        const shuffledProds = [...prodRes].sort(() => 0.5 - Math.random());
-        setRandomProducts(shuffledProds.slice(0, 8));
+        const shuffledProds = (prodRes || []).sort(() => 0.5 - Math.random());
+        setRandomCollections(shuffledProds.slice(0, 2));
 
       } catch (error) {
-        console.error("Failed to fetch categories", error);
+        console.error("Failed to load home data", error);
       } finally {
         setLoading(false);
       }
@@ -36,73 +37,141 @@ export default function Home() {
   }, []);
 
   const getCategoryImage = (categoryId) => {
-    const product = products.find((p) => p.category === categoryId);
-    return product && product.imageUrls?.length > 0
-      ? product.imageUrls[0]
-      : "https://placehold.co/300x180?text=No+Image";
+    if(!products.length) return "https://placehold.co/300x180?text=Loading"
+
+    const product = products.find((p) => {
+      const pCatId = typeof p.category === 'object' ? p.category._id : p.category
+      return pCatId === categoryId
+    })
+
+    return product && (product.imageUrls?.[0] || product.image) ? (product.imageUrls?.[0] || product.image) : "https://placehold.co/300x180?text=No+Image"
   };
 
+  if(loading){
+    return(
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="spinner-border text-primary" role="status"></div>
+      </div>
+    )
+  }
+
+  const images = [
+    "https://images.unsplash.com/photo-1547891654-e66ed7ebb968?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
+    "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
+    "https://images.unsplash.com/photo-1578301978018-3005759f48f7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
+    "https://images.unsplash.com/photo-1513364776144-60967b0f800f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80", 
+    "https://images.unsplash.com/photo-1547891654-e66ed7ebb968?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
+ ]
+
   return (
-    <div className="container mt-4">
-      <div className="text-center mb-4">
-        <h3 className="fw-semibold mb-4">Featured Categories</h3>
-        {loading ? (
-          <div className="text-center mt-5">
-            <div className="spinner-border text-primary" role="status"></div>
-            <p className="mt-3">Loading Categories...</p>
-          </div>
-        ) : (
-          <div className="row g-4 mb-5">
-            {randomCategories.map((cat) => (
+    <div className="container-fluid p-0 mb-5">
+      <div className="container mt-4 mb-5">
+        <div className="row g-3 mb-4">
+            {categories.map((cat) => (
               <div
-                className="col-md-3"
+                className="col-6 col-md-3"
                 key={cat._id}
                 onClick={() => navigate(`/products?category=${cat._id}`)}
                 style={{ cursor: "pointer" }}
               >
-                <div className="card border-0 shadow-sm rounded-3">
+                <div className="card border-0 shadow-sm overflow-hidden position-relative rounded-3">
+                  <div style={{height: "120px", backgroundColor: "$f8f9fa"}}>
                   <img
                     src={getCategoryImage(cat._id)}
                     alt={cat.name}
-                    className="card-img-top"
-                    style={{ height: "180px", objectFit: "cover" }}
+                    className="w-100 h-100"
+                    style={{ objectFit: "cover" }}
                   />
-                  <div className="card-body text-center">
-                    <h6 className="card-title">{cat.name}</h6>
+                  </div>
+                  <div className="bg-white py-2 border-top text-center">
+                    <h6 className="fw-bold text-uppercase m-0 small text-dark text-truncate px-2">{cat.name}</h6>
                   </div>
                 </div>
               </div>
             ))}
           </div>
-        )}
-        <div className="mb-5">
-            <div id="homeCarousel" className="carousel slide" data-bs-ride="carousel">
-                <div className="carousel-indicators">
-                    {randomProducts.map((_, i) => (
-                        <button key={i} type="button" data-bs-target="#homeCarousel" data-bs-slide-to={i} className={i === 0 ? "active" : ""}></button>
-                    ))}
+            <div id="homeCarousel" className="carousel slide mb-5 rounded overflow-hidden shadow-sm" data-bs-ride="carousel">
+              <div className="carousel-indicators">
+                <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="0" className="active"></button>
+                <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="1"></button>
+                <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="2"></button>
+                <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="3"></button>
+                <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="4"></button>
+              </div>
+              <div className="carousel-inner">
+                <div className="carousel-item active" style={{height: "50vh", minHeight: "350px"}}>
+                  <img src={images[0]} alt="Abstract" className="d-block w-100 h-100" style={{objectFit: "cover", filter: "brightness(0.7)"}} />
+                  <div className="carousel-caption d-flex flex-column align-items-center justify-content-center h-100">
+                    <h2 className="display-4 fw-bold text-uppercase">Abstract Art</h2>
+                    <button className="btn btn-light fw-bold mt-3 px-4 rounded-0 text-uppercase" onClick={() => navigate(`/products`)}>Shop Now</button>
+                  </div>
                 </div>
-                <div className="carousel-inner rounded-3 shadow-sm" style={{height: "350px"}}>
-                    {randomProducts.map((prod, i) => (
-                        <div key={prod._id} className={`carousel-item ${i === 0 ? "active" : ""}`} style={{cursor: "pointer"}} onClick={() => navigate(`/product/${prod._id}`)}>
-                            <img src={prod.imageUrls[0]} alt={prod.name} className="d-block w-100" style={{height: "350px", objectFit: "cover"}} />
-                        </div>
-                    ))}
+                <div className="carousel-item active" style={{height: "50vh", minHeight: "350px"}}>
+                  <img src={images[1]} alt="Modern" className="d-block w-100 h-100" style={{objectFit: "cover", filter: "brightness(0.7)"}} />
+                  <div className="carousel-caption d-flex flex-column align-items-center justify-content-center h-100">
+                    <h2 className="display-4 fw-bold text-uppercase">Modern Vibes</h2>
+                    <button className="btn btn-outline-light fw-bold mt-3 px-4 rounded-0 text-uppercase" onClick={() => navigate(`/products`)}>Explore</button>
+                  </div>
                 </div>
+                <div className="carousel-item active" style={{height: "50vh", minHeight: "350px"}}>
+                  <img src={images[2]} alt="Classic" className="d-block w-100 h-100" style={{objectFit: "cover", filter: "brightness(0.7)"}} />
+                  <div className="carousel-caption d-flex flex-column align-items-center justify-content-center h-100">
+                    <h2 className="display-4 fw-bold text-uppercase">Timeless Classics</h2>
+                    <button className="btn btn-primary fw-bold mt-3 px-4 rounded-0 text-uppercase" onClick={() => navigate(`/products`)}>View Collection</button>
+                  </div>
+                </div>
+                <div className="carousel-item active" style={{height: "50vh", minHeight: "350px"}}>
+                  <img src={images[3]} alt="Colors" className="d-block w-100 h-100" style={{objectFit: "cover", filter: "brightness(0.7)"}} />
+                  <div className="carousel-caption d-flex flex-column align-items-center justify-content-center h-100">
+                    <h2 className="display-4 fw-bold text-uppercase">Vibrant Colors</h2>
+                    <button className="btn btn-outline-light fw-bold mt-3 px-4 rounded-0 text-uppercase" onClick={() => navigate(`/products`)}>Explore</button>
+                  </div>
+                </div>
+                <div className="carousel-item active" style={{height: "50vh", minHeight: "350px"}}>
+                  <img src={images[4]} alt="Abstract" className="d-block w-100 h-100" style={{objectFit: "cover", filter: "brightness(0.7)"}} />
+                  <div className="carousel-caption d-flex flex-column align-items-center justify-content-center h-100">
+                    <h2 className="display-4 fw-bold text-uppercase">Abstract Art</h2>
+                    <button className="btn btn-outline-light fw-bold mt-3 px-4 rounded-0 text-uppercase" onClick={() => navigate(`/products`)}>Explore</button>
+                  </div>
+                </div>
+              </div>
+              <button className="carousel-control-prev" type="button" data-bs-target="#homeCarousel" data-bs-slide="prev">
+                <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span className="visually-hidden">Previous</span>
+              </button>
+              <button className="carousel-control-next" type="button" data-bs-target="#homeCarousel" data-bs-slide="next">
+                <span className="carousel-control-next-icon" aria-hidden="true"></span>
+                <span className="visually-hidden">Next</span>
+              </button>
             </div>
-        </div>
         <div className="row g-4 mb-5">
-            {randomProducts.map((prod) => (
-                <div className="col-md-6" key={prod._id} onClick={() => navigate(`/product/${prod._id}`)} style={{cursor: "pointer"}}>
-                    <div className="card border-0 shadow-sm rounded-3">
-                        <img src={prod.imageUrls[0]} alt={prod.name} className="card-img-top" style={{height: "250px", objectFit: "cover"}} />
-                        <div className="card-body">
-                            <h5 className="card-title">{prod.name}</h5>
-                            <p className="card-text fw-bold">₹{prod.price}</p>
+            {randomCollections.map((prod, index) => (
+                <div className="col-md-6" key={prod._id}>
+                    <div className="card border-0 bg-light h-100 overflow-hidden shadow-sm rounded-3">
+                      <div className="row g-0 h-100 align-items-center">
+                        <div className="col-5 h-100">
+                          <img src={prod.imageUrls?.[0] || prod.image} alt={prod.name} className="img-fluid" style={{height: "100%", width: "100%", objectFit: "cover", minHeight: "220px"}} />
                         </div>
+                        <div className="col-7">
+                          <div className="p-4">
+                            <small className="text-muted text-uppercase fw-bold 1s-1">{index === 0 ? "Artist's Choice": "New Arrival"}</small>
+                            <h4 className="fw-bold my-2 text-truncate">{prod.name}</h4>
+                            <p className="small text-muted mb-3 line-clamp-2">{prod.description ? prod.description.substring(0, 60) + "..." : "Explre this magnificent piece of art for your collection."}</p>
+                            <button className="btn btn-link p-0 text-dark fw-bold text-decoration-none" onClick={() => navigate(`/product/${prod._id}`)}>View Painting <FaArrowRight size={12} /></button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                 </div>
             ))}
+        </div>
+        <div className="bg-dark text-white rounded p-4 p-md-5 text-center mb-5">
+          <h3 className="fw-bold">Join the Art Community</h3>
+          <p className="lead text-white-50 small d-none d-sm-block">Get updates on new arrivals and exclusive offers directly to your inbox.</p>
+          <div className="d-flex justify-content-center gap-2 mt-4 flex-wrap">
+            <input type="email" placeholder="Your email address" className="form-control w-auto" style={{minWidth: "250px"}} />
+            <button className="btn btn-primary fw-bold px-4">Subscribe</button>
+          </div>
         </div>
       </div>
     </div>

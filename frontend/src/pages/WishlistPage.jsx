@@ -1,34 +1,41 @@
 import { Link } from "react-router-dom"
 import { useCartContext } from "../contexts/CartContext"
 import { useWishlistContext } from "../contexts/WishlistContext"
+import { FaTrash } from "react-icons/fa"
+import { toast } from "react-toastify"
 
 const WishlistPage = () => {
   const { addToCart } = useCartContext()
   const { wishlist, removeFromWishlist } = useWishlistContext()
 
   return (
-    <div className="container py-4">
-      <h5 className="fw-bold mb-4 text-center">My Wishlist ❤️</h5>
+    <div className="container py-4 mb-5">
+      <h2 className="fw-bold mb-4 text-center text-uppercase">My Wishlist  ❤️</h2>
 
       {wishlist.length === 0 ? (
-        <p className="text-muted">Your wishlist is empty.</p>
+        <div className="text-center py-5">
+          <p className="text-muted">Your wishlist is empty.</p>
+          <Link to="/products" className="btn btn-primary mt-2">Browse Art</Link>
+        </div>
       ) : (
-        <div className="row g-4">
+        <div className="row g-3 g-md-4">
           {wishlist.map((item) => {
-            const p = item.product || item // Depending on stored structure
+            const p = item.product || item 
 
             return (
-              <div className="col-md-3" key={p._id}>
-                <div className="shadow-sm p-2 text-center position-relative">
+              <div className="col-6 col-md-4 col-lg-3" key={p._id}>
+                <div className="shadow-sm p-3 text-center position-relative h-100 border-rounded">
                     <button
-                    className="position-absolute top-0 end-0 btn-light fs-4 border-0 rounded-circle bg-transparent shadow-sm"
+                    className="position-absolute top-0 end-0 m-2 btn btn-light rounded-circle p-0 d-flex align-items-center justify-content-center shadow-sm"
+                    style={{width: "35px", height: "35px"}}
                     onClick={(e) => {
                       e.stopPropagation()
-                      e.preventDefault()
                       removeFromWishlist({ productId: p._id })
+                      toast.error("Removed from Wishlist")
                     }}
                   >
-                    ❤️
+                    {/* ❤️ */}
+                    <FaTrash color="red" size={14} /> 
                   </button>
 
                   <Link to={`/product/${p._id}`} className="text-decoration-none text-dark">
@@ -47,8 +54,10 @@ const WishlistPage = () => {
                   <button
                     className="btn btn-secondary btn-sm w-100 mb-2"
                     onClick={async() => {
-                      await addToCart(p._id, 1, null)
+                      const defaultSize = p.sizes && p.sizes.length > 0 ? p.sizes[0] : ""
+                      await addToCart(p._id, 1, defaultSize)
                       removeFromWishlist({productId: p._id})
+                      toast.success("Added to Cart")
                     }}
                   >
                     Move to Cart

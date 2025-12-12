@@ -13,6 +13,9 @@ import CheckoutPage from "./pages/CheckoutPage";
 import OrderSuccess from "./pages/OrderSuccess";
 import OrderHistoryPage from "./pages/OrderHistoryPage";
 
+import { ToastContainer } from "react-toastify"
+import "react-toastify/dist/ReactToastify.css"
+
 function App() {
   return (
     <>
@@ -34,6 +37,7 @@ function App() {
                   <Route path="/order-history" element={<OrderHistoryPage/>} />
                 </Routes>
               </main>
+              <ToastContainer position="bottom-right" autoClose={2000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="light"/>
             </Router>
           </AddressProvider>
         </WishlistProvider>
