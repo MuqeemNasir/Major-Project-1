@@ -6,22 +6,26 @@ import { toast } from "react-toastify"
 
 const WishlistPage = () => {
   const { addToCart } = useCartContext()
-  const { wishlist, removeFromWishlist } = useWishlistContext()
+  const { wishlist, removeFromWishlist, loading } = useWishlistContext()
+
+  if(!wishlist?.length && !loading){
+    return(
+      <div className="container py-5 text-center">
+        <h2 className="fw-bold mb-3 text-uppercase">My Wishlist ❤️</h2>
+        <p className="text-muted">Your wishlist is emtpy.</p>
+        <Link to="/products" className="btn btn-primary mt-2">Browse Art</Link>
+      </div>
+    )
+  }
+
+  if(loading) return <div style={{minHeight: "60vh"}}></div>
 
   return (
     <div className="container py-4 mb-5">
       <h2 className="fw-bold mb-4 text-center text-uppercase">My Wishlist  ❤️</h2>
-
-      {wishlist.length === 0 ? (
-        <div className="text-center py-5">
-          <p className="text-muted">Your wishlist is empty.</p>
-          <Link to="/products" className="btn btn-primary mt-2">Browse Art</Link>
-        </div>
-      ) : (
         <div className="row g-3 g-md-4">
           {wishlist.map((item) => {
             const p = item.product || item 
-
             return (
               <div className="col-6 col-md-4 col-lg-3" key={p._id}>
                 <div className="shadow-sm p-3 text-center position-relative h-100 border-rounded">
@@ -67,7 +71,6 @@ const WishlistPage = () => {
             )
           })}
         </div>
-      )}
     </div>
   )
 }

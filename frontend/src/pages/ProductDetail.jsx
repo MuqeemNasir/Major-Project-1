@@ -6,6 +6,7 @@ import { useWishlistContext } from "../contexts/WishlistContext"
 import { FiCreditCard, FiLock, FiRefreshCcw, FiTruck } from "react-icons/fi"
 import RelatedProducts from "../components/Products/RelatedProducts"
 import { toast } from "react-toastify";
+import { useLoadingContext } from "../contexts/LoadingContext"
 
 const ProductDetail = () => {
   const { id } = useParams()
@@ -13,6 +14,7 @@ const ProductDetail = () => {
 
   const { addToCart, cart } = useCartContext() 
   const { addToWishlist, removeFromWishlist, wishlist } = useWishlistContext()
+  const { setIsLoading } = useLoadingContext()
 
   const [product, setProduct] = useState(null)
   const [quantity, setQuantity] = useState(1)
@@ -26,6 +28,7 @@ const ProductDetail = () => {
   }, [id])
 
   const fetchProduct = async () => {
+    setIsLoading(true)
     try {
       const res = await apiGetProductsById(id)
       const prod = res?.data?.data?.product || res?.data?.product || res?.product || res
@@ -41,6 +44,8 @@ const ProductDetail = () => {
       else setSize("")
     } catch (error) {
       console.log("Single product fetch error: ", error)
+    }finally{
+      setIsLoading(false)
     }
   };
 
@@ -93,7 +98,7 @@ const ProductDetail = () => {
     }
   }
 
-  if (!product) return <div className="text-center py-5 fw-semibold">Loading product...</div>
+  if (!product) return null
 
   return (
     <div className="container-fluid container-md py-3 py-md-2">
@@ -104,7 +109,7 @@ const ProductDetail = () => {
               src={product.image}
               alt={product.name}
               className="img-fluid rounded shadow-sm w-100"
-              style={{ objectFit: "cover", width: "100%", maxHeight: window.innerWidth < 768 ? "350px" : "500px", backgroundColor: "#f8f9fa" }}
+              style={{ objectFit: "cover", width: "100%", height: "auto", maxHeight: "500px", minHeight: "300px", backgroundColor: "#f8f9fa" }}
             />
             <button
               onClick={handleWishlist}

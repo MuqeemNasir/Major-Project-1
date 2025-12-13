@@ -30,13 +30,6 @@ const CartPage = () => {
     }
   }
 
-  // const isWishlisted = (productId) =>
-  //   wishlist?.some(
-  //     (w) => String(w?.product?._id || w?.productId) === String(productId)
-  //   );
-
-
-
   const moveToWishlist = async (item) => {
     const productId = item.product?._id || item.product;
     const size = item.size || "";
@@ -70,10 +63,13 @@ const CartPage = () => {
     return(
       <div className="container text-center py-5">
         <h3 className="fw-bold text-muted">🛒 Cart is Empty</h3>
+        <p className="text-muted">Looks like you haven't added anything yet.</p>
         <button className="btn btn-primary mt-3" onClick={() => navigate(`/products`)}>Shop Now</button>
       </div>
     )
   }
+
+  if (loading) return <div style={{minHeight: "60vh"}}></div>
 
   return (
     <div className="container py-4 mb-5">

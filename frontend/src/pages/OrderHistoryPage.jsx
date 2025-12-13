@@ -3,16 +3,17 @@ import { apiGetUser } from "../services/userApi"
 import { apiGetOrders } from "../services/orderAPI"
 import { FaCalendarAlt, FaMapMarkedAlt, FaMoneyBillWave } from "react-icons/fa"
 import { Link } from "react-router-dom"
+import { useLoadingContext } from "../contexts/LoadingContext"
 
 const OrderHistoryPage = () => {
     const [orders, setOrders] = useState([])
-    const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
     const [userId, setUserId] = useState(null)
-
+    const { setIsLoading } = useLoadingContext()
 
     useEffect(() => {
         const loadUser = async() => {
+            setIsLoading(true)
             try{
                 const res = await apiGetUser()
                 const user = res?.data?.data?.existingUser || res?.data?.user
@@ -21,21 +22,22 @@ const OrderHistoryPage = () => {
                     setUserId(user._id)
                 }else{
                     setError("User not found.")
-                    setLoading(false)
                 }
             }catch(err){
                 console.error("Failed to load user: ", err)
                 setError("Failed to load user.")
-                setLoading(false)
+            }finally{
+                setIsLoading(false)
             }
         }
         loadUser()
-    }, [])
+    }, [setIsLoading])
 
     useEffect(() => {
         if(!userId) return
         
         const fetchOrders = async() => {
+            setIsLoading(true)
             try{
                 const res = await apiGetOrders()
                 setOrders(res?.data?.orders || [])
@@ -43,11 +45,11 @@ const OrderHistoryPage = () => {
                 console.error("Error fetching orders: ", err)
                 setError("Failed to load orders.")
             }finally{
-                setLoading(false)
+                setIsLoading(false)
             }
         }
         fetchOrders()
-    }, [userId])
+    }, [userId, setIsLoading])
 
     const getStatusBadge = (status) => {
         const s = status?.toLowerCase() || "pending"
@@ -57,7 +59,6 @@ const OrderHistoryPage = () => {
         return "bg-warning text-dark"
     }
 
-    if(loading) return <p className="text-center mt-4">Loading orders...</p>
     if(error) return <p className="text-danger text-center">{error}</p>
 
     if(orders.length === 0) return <h5 className="text-center mt-5">No Orders Found.</h5>

@@ -6,7 +6,7 @@ import { toast } from 'react-toastify'
 import { FaCheckCircle, FaEdit, FaPlus, FaTrash } from 'react-icons/fa'
 
 export default function AddressPage(){
-  const {addresses, selectedAddress, setSelectedAddress, addAddress, updateAddress, deleteAddress} = useAddressContext()
+  const {addresses, selectedAddress, setSelectedAddress, addAddress, updateAddress, deleteAddress, loading} = useAddressContext()
   const navigate = useNavigate()
 
   const [editing, setEditing] = useState(null)
@@ -38,6 +38,8 @@ export default function AddressPage(){
     }
   }
 
+  if(loading && addresses.length === 0) return <div style={{minHeight: "60vh"}}></div>
+
   return (
     <div className="container py-4 mb-5">
         <h3 className="mb-4 fw-bold">Select Delivery Address</h3>
@@ -52,6 +54,11 @@ export default function AddressPage(){
               onSubmit={handleSubmit}
               onCancel={() => { setShowForm(false); setEditing(null) }}
             />
+            </div>
+        )}
+        {addresses.length === 0 && !showForm && (
+            <div className="text-center py-5 text-muted border rounded bg-light">
+                <p>No addresses found. Add one to proceed.</p>
             </div>
         )}
 

@@ -6,6 +6,7 @@ import ProductCard from "../components/Products/ProductCard";
 import { useCartContext } from "../contexts/CartContext";
 import { useWishlistContext } from "../contexts/WishlistContext";
 import { FaFilter } from "react-icons/fa";
+import { useLoadingContext } from "../contexts/LoadingContext";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -21,6 +22,7 @@ const ProductList = () => {
 
   const { cart, addToCart, removeItemFromCart } = useCartContext();
   const { wishlist, addToWishlist, removeFromWishlist } = useWishlistContext();
+  const {setIsLoading} = useLoadingContext()
 
   const [searchParams] = useSearchParams();
   const categoryFromURL = searchParams.get("category");
@@ -31,6 +33,7 @@ const ProductList = () => {
   }, []);
 
   const fetchInitialData = async () => {
+    setIsLoading(true)
     try {
       const productRes = await apiGetAllProducts();
 
@@ -62,6 +65,8 @@ const ProductList = () => {
       }
     } catch (error) {
       console.error("Server error in fetch data: ", error);
+    }finally{
+      setIsLoading(false)
     }
   };
 

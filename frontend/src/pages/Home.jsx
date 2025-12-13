@@ -2,17 +2,18 @@ import { useEffect, useState } from "react";
 import { apiGetAllProducts, apiGetCategories } from "../services/productAPI";
 import { useNavigate } from "react-router-dom";
 import { FaArrowRight } from "react-icons/fa";
+import { useLoadingContext } from "../contexts/LoadingContext";
 
 export default function Home() {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [randomCollections, setRandomCollections] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const {setIsLoading} = useLoadingContext()
   const navigate = useNavigate();
 
   useEffect(() => {
     const load = async () => {
-      setLoading(true);
+      setIsLoading(true);
       try {
         const [catRes, prodRes] = await Promise.all([
           apiGetCategories(),
@@ -30,11 +31,11 @@ export default function Home() {
       } catch (error) {
         console.error("Failed to load home data", error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
     load();
-  }, []);
+  }, [setIsLoading]);
 
   const getCategoryImage = (categoryId) => {
     if(!products.length) return "https://placehold.co/300x180?text=Loading"
@@ -46,14 +47,6 @@ export default function Home() {
 
     return product && (product.imageUrls?.[0] || product.image) ? (product.imageUrls?.[0] || product.image) : "https://placehold.co/300x180?text=No+Image"
   };
-
-  if(loading){
-    return(
-      <div className="d-flex justify-content-center align-items-center vh-100">
-        <div className="spinner-border text-primary" role="status"></div>
-      </div>
-    )
-  }
 
   const images = [
     "https://images.unsplash.com/photo-1547891654-e66ed7ebb968?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80",
@@ -106,28 +99,28 @@ export default function Home() {
                     <button className="btn btn-light fw-bold mt-3 px-4 rounded-0 text-uppercase" onClick={() => navigate(`/products`)}>Shop Now</button>
                   </div>
                 </div>
-                <div className="carousel-item active" style={{height: "50vh", minHeight: "350px"}}>
+                <div className="carousel-item" style={{height: "50vh", minHeight: "350px"}}>
                   <img src={images[1]} alt="Modern" className="d-block w-100 h-100" style={{objectFit: "cover", filter: "brightness(0.7)"}} />
                   <div className="carousel-caption d-flex flex-column align-items-center justify-content-center h-100">
                     <h2 className="display-4 fw-bold text-uppercase">Modern Vibes</h2>
                     <button className="btn btn-outline-light fw-bold mt-3 px-4 rounded-0 text-uppercase" onClick={() => navigate(`/products`)}>Explore</button>
                   </div>
                 </div>
-                <div className="carousel-item active" style={{height: "50vh", minHeight: "350px"}}>
+                <div className="carousel-item" style={{height: "50vh", minHeight: "350px"}}>
                   <img src={images[2]} alt="Classic" className="d-block w-100 h-100" style={{objectFit: "cover", filter: "brightness(0.7)"}} />
                   <div className="carousel-caption d-flex flex-column align-items-center justify-content-center h-100">
                     <h2 className="display-4 fw-bold text-uppercase">Timeless Classics</h2>
                     <button className="btn btn-primary fw-bold mt-3 px-4 rounded-0 text-uppercase" onClick={() => navigate(`/products`)}>View Collection</button>
                   </div>
                 </div>
-                <div className="carousel-item active" style={{height: "50vh", minHeight: "350px"}}>
+                <div className="carousel-item" style={{height: "50vh", minHeight: "350px"}}>
                   <img src={images[3]} alt="Colors" className="d-block w-100 h-100" style={{objectFit: "cover", filter: "brightness(0.7)"}} />
                   <div className="carousel-caption d-flex flex-column align-items-center justify-content-center h-100">
                     <h2 className="display-4 fw-bold text-uppercase">Vibrant Colors</h2>
                     <button className="btn btn-outline-light fw-bold mt-3 px-4 rounded-0 text-uppercase" onClick={() => navigate(`/products`)}>Explore</button>
                   </div>
                 </div>
-                <div className="carousel-item active" style={{height: "50vh", minHeight: "350px"}}>
+                <div className="carousel-item" style={{height: "50vh", minHeight: "350px"}}>
                   <img src={images[4]} alt="Abstract" className="d-block w-100 h-100" style={{objectFit: "cover", filter: "brightness(0.7)"}} />
                   <div className="carousel-caption d-flex flex-column align-items-center justify-content-center h-100">
                     <h2 className="display-4 fw-bold text-uppercase">Abstract Art</h2>

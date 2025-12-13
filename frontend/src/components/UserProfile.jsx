@@ -63,17 +63,18 @@ const UserProfile = () => {
                     <p className="text-muted">No user available. Please login to view profile.</p>
                 )} 
                 {!loading && user && (
-                    <div className="card-shadow-sm mb-4">
+                    <div className="card-shadow-sm mb-4 border-0 bg-light">
                         <div className="card-body">
-                            <p className="mb-1"><strong>Name: </strong>{user.name}</p>
-                            <p className="mb-1"><strong>Email: </strong>{user.email}</p>
-                            <p className="mb-0"><strong>Phone: </strong>{user.phone}</p>
+                            <p className="mb-3 fw-bold"><strong>Name: </strong>{user.name}</p>
+                            <p className="mb-1 text-muted small"><strong>Email: </strong>{user.email}</p>
+                            <p className="mb-0 text-muted small"><strong>Phone: </strong>{user.phone}</p>
                         </div>
                     </div>
                 )}
-
-                <button onClick={() => navigate("/address")} className="btn btn-outline-dark w-100 mb-2" data-bs-dismiss="offcanvas">Add/Manage Address</button>
-                <button onClick={() => navigate("/order-history")} className="btn btn-outline-dark w-100" data-bs-dismiss="offcanvas">Order History</button>
+                <div className="d-grid gap-2">
+                    <button onClick={() => navigate("/address")} className="btn btn-outline-dark py-2" data-bs-dismiss="offcanvas">Add/Manage Address</button>
+                    <button onClick={() => navigate("/order-history")} className="btn btn-outline-dark py-2" data-bs-dismiss="offcanvas">Order History</button>
+                </div>
             </div>
         </div>
     )
