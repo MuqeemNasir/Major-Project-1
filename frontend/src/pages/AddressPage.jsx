@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import AddressForm from '../components/AddressForm'
 import { useNavigate } from 'react-router-dom'
 import { useAddressContext } from '../contexts/AddressContext'
@@ -11,6 +11,14 @@ export default function AddressPage(){
 
   const [editing, setEditing] = useState(null)
   const [showForm, setShowForm] = useState(false)
+
+  const formRef = useRef(null)
+
+  useEffect(() => {
+    if(showForm && formRef.current){
+        formRef.current.scrollIntoView({behavior: "smooth", block: "center"})
+    }
+  }, [showForm])
 
   const handleSubmit = async(data) => {
     try {
@@ -48,7 +56,7 @@ export default function AddressPage(){
              <button className="btn btn-outline-primary mb-4 w-100 py-2 d-flex align-items-center justify-content-center gap-2" onClick={() => setShowForm(true)}><FaPlus size={14} /> Add New Address</button>
         )}
         {showForm &&(
-            <div className="mb-4">
+            <div className="mb-4" ref={formRef}>
             <AddressForm 
               initialData={editing}
               onSubmit={handleSubmit}
