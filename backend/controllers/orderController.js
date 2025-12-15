@@ -27,7 +27,7 @@ const finalizeItemsAndCalculateTotal = async (items) => {
 
     const orderItems = []
     let totalAmount = 0
-    const DELIVERY_CHARGE = 0
+    const DELIVERY_CHARGE = 499
 
 
     for (const item of items) {
