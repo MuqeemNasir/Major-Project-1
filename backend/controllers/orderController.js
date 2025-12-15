@@ -27,6 +27,7 @@ const finalizeItemsAndCalculateTotal = async (items) => {
 
     const orderItems = []
     let totalAmount = 0
+    const DELIVERY_CHARGE = 0
 
 
     for (const item of items) {
@@ -35,14 +36,18 @@ const finalizeItemsAndCalculateTotal = async (items) => {
             throw new Error(`Product ${item.product} not found.`)
         }
 
+        const originalPrice = product.price
+        const discountedPrice = Math.floor(originalPrice * 0.5)
+
         orderItems.push({
             product: product._id,
             quantity: item.quantity,
             size: item.size || null,
-            priceAtPurchase: product.price,
+            priceAtPurchase: discountedPrice,
         })
-        totalAmount += product.price * item.quantity
+        totalAmount += discountedPrice * item.quantity
     }
+    totalAmount += DELIVERY_CHARGE
     return { orderItems, totalAmount }
 }
 
