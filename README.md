@@ -1,5 +1,10 @@
 # 🎨 Artify - Paintings Store
 
+[![React](https://img.shields.io/badge/React-18-blue.svg)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-LTS-green.svg)](https://nodejs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-brightgreen.svg)](https://www.mongodb.com/)
+[![Vercel](https://img.shields.io/badge/Vercel-Deployed-black.svg)](https://vercel.com/)
+
 Artify is a full-stack E-Commerce application designed for buying and selling fine art and paintings. Built using the MERN stack (MongoDB, Express, React, Node.js), it features a seamless shopping experience with product filtering, cart management, wishlist functionality, and a secure checkout process.
 
 ## Live Demo
