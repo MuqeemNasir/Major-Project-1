@@ -1,10 +1,29 @@
 # 🎨 Artify - Paintings Store
 
+[![React](https://img.shields.io/badge/React-18-blue.svg)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-LTS-green.svg)](https://nodejs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-brightgreen.svg)](https://www.mongodb.com/)
+[![Vercel](https://img.shields.io/badge/Vercel-Deployed-black.svg)](https://vercel.com/)
+
 Artify is a full-stack E-Commerce application designed for buying and selling fine art and paintings. Built using the MERN stack (MongoDB, Express, React, Node.js), it features a seamless shopping experience with product filtering, cart management, wishlist functionality, and a secure checkout process.
 
 ## Live Demo
 - **Frontend**: [https://artify-client.vercel.app](https://arify-frontend.vercel.app/)<br>
 - **Backend API**: [https://major-project-1-mauve.vercel.app](https://major-project-1-mauve.vercel.app/)
+
+## Environment Setup
+To run this project locally, you must configure the following environment variables:
+### Backend (/backend/.env)
+```
+MONGODB_URI=mongodb+srv://neoGStudent:MUqeem786%24@neog.aqqwr1m.mongodb.net/ecommerceDB?retryWrites=true&w=majority&appName=neoG
+PORT=3000
+NODE_ENV=development
+```
+
+### Frontend (/frontend/.env)
+```
+VITE_API_URL=https://major-project-1-mauve.vercel.app || http://localhost:3000/api/events
+```
 
 ## Quick Start
 
@@ -51,59 +70,157 @@ Watch a walkthrough of all major features of this app:<br>
 ##  Features
 
 ### Immersive Gallery (Discovery)
-- **Visual Hero Carousel**: Engaging landing page with curated art collections.
-- **Advanced Filtering Engine**: Filter artworks by Category, Price Range, and Star Rating simultaneously.
-- **Global Search**: Instant text-based search for painting names, artists, or descriptions.
-- **Smart Sorting**: Sort collections by Price (Low-High / High-Low).
+- Showcases curated art collections via an engaging hero carousel.
+- Filters artworks simultaneously by category, price range, and star rating.
+- Searches instantly for painting names, artists, or descriptions in real-time.
+- Sorts collections dynamically by price (Low-High / High-Low).
 
 ### Dynamic Cart & Wishlist Engine
-- **Real-time Calculations**: Automatic computation of subtotals, discounts (50% OFF logic), and delivery charges.
-- **Persistent Wishlist**: Move items between Cart and Wishlist seamlessly.
-- **Stock Management**: Quantity adjusters preventing invalid inputs.
-- **Empty State Handling**: Custom UI for empty carts with "Shop Now" redirection.
+- Calculates subtotals, discounts (50% OFF logic), and delivery charges automatically.
+- Moves items seamlessly between the shopping cart and wishlist.
+- Manages stock quantities to prevent invalid user inputs.
+- Redirects users via a custom UI when the shopping cart is empty.
 
 ### Checkout & Order Management
-- **Address Book System**: Full CRUD (Create, Read, Update, Delete) for shipping addresses.
-- **Order Summary**: "Sticky" price details sidebar ensuring visibility during checkout.
-- **Order History**: Chronological list of past orders with status badges (Placed, Delivered) and detailed item breakdowns.
+- Allows users to create, update, and delete multiple shipping addresses.
+- Displays a sticky price summary for constant visibility during checkout.
+- Tracks past orders chronologically with status badges and item breakdowns.
 
 ### Product Details (Super Feature)
-- **Related Products**: A recommendation engine suggesting similar paintings based on the current view.
-- **Size Selection**: Dynamic size toggles for artworks.
-- **Status Indicators**: Visual cues for "In Cart" or "In Wishlist" directly on the product page.
+- Recommends similar paintings based on the current product view.
+- Enables dynamic size selection for specific artworks.
+- Indicates "In Cart" or "In Wishlist" status visually on the product page.
 
 ## API Reference
 ### GET /api/products
-Fetch all products. Supports query parameters for filtering.<br>
+Fetch all products.<br>
 Query Params: category, search, minPrice, maxPrice.<br>
 Sample Response:
 ```
-{ "_id": "...", "name": "Abstract Waves", "price": 12000, "category": "..." }
+{ 
+    "_id": "65b1...", 
+    "name": "Abstract Waves", 
+    "price": 12000, 
+    "rating": 4.5,
+    "image": "https://example.com/art.jpg" 
+  },
+  { ... }
 ```
 
 ### GET /api/products/:id
-Fetch a single product's detailed metadata, including available sizes and artist info.
-
-### GET /api/carts
-Fetch the current user's active shopping cart with populated product details.
-
-### POST /api/orders
-Place a new order. Clears the cart upon success.<br>
+Fetch a single product's detailed.<br>
 Sample Response:
 ```
 {
-  "shippingAddressId": "65b...",
-  "items": [{ "product": "...", "quantity": 1 }],
-  "totalAmount": 15499
+  "_id": "65b1...",
+  "name": "Abstract Waves",
+  "artist": "John Doe",
+  "description": "A beautiful representation of ocean waves...",
+  "price": 12000,
+  "sizes": ["M", "L", "XL"],
+  "stock": 5
+}
+```
+
+### GET /api/carts
+Fetch the current user's shopping cart with product details.<br>
+Sample Response:
+```
+{
+  "_id": "65c2...",
+  "user": "65a1...",
+  "items": [
+    {
+      "product": {
+        "_id": "65b1...",
+        "name": "Abstract Waves",
+        "price": 12000,
+        "image": "https://example.com/art.jpg"
+      },
+      "quantity": 1,
+      "size": "L",
+      "_id": "65d3..."
+    }
+  ]
+}
+```
+
+### POST /api/orders
+Place a new order. Clears the cart upon success.<br>
+Request Body:
+```
+{
+  "shippingAddressId": "65e4...",
+  "items": [
+    { "product": "65b1...", "quantity": 1, "size": "L" }
+  ],
+  "totalAmount": 12499
+}
+```
+Sample Response:
+```
+{
+  "message": "Order Placed Successfully!",
+  "order": {
+    "_id": "65f5...",
+    "status": "placed",
+    "totalAmount": 12499
+  }
 }
 ```
 
 ### GET /api/orders
-Fetch order history for the logged-in user, sorted by newest first.
+Fetch order history for the logged-in user.<br>
+Sample Response:
+```
+[
+  {
+    "_id": "65f5...",
+    "createdAt": "2024-02-20T10:00:00Z",
+    "status": "placed",
+    "totalAmount": 12499,
+    "items": [
+      {
+        "product": { "name": "Abstract Waves", "image": "..." },
+        "quantity": 1,
+        "priceAtPurchase": 12000
+      }
+    ]
+  }
+]
+```
 
 
 ### POST /api/address
-Add a new shipping address to the user's profile.
+Add a new shipping address to the user's profile.<br>
+Request Body:
+```
+{
+  "label": "Office",
+  "name": "Jane Doe",
+  "phone": "9876543210",
+  "line1": "456 Corp Park",
+  "city": "Bangalore",
+  "state": "Karnataka",
+  "postalCode": "560001",
+  "country": "India",
+  "isDefault": false
+}
+```
+Sample Response:
+```
+{
+  "message": "Address added successfully",
+  "data": {
+    "address": {
+      "_id": "65f1...",
+      "label": "Office",
+      "city": "Bangalore",
+      "createdAt": "2024-02-21T12:00:00Z"
+    }
+  }
+}
+```
 
 ## 🔌 API Endpoints
 
